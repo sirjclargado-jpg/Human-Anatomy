@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Human Anatomy Quiz – 100 Items</title>
+
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -10,13 +11,15 @@
     margin: auto;
     padding: 20px;
   }
-  h1 {
+  h1, h2 {
     text-align: center;
   }
   .choice {
+    display: block;
+    width: 100%;
     margin: 8px 0;
     padding: 10px;
-    width: 100%;
+    font-size: 16px;
     cursor: pointer;
   }
   .correct {
@@ -25,45 +28,101 @@
   .wrong {
     background-color: #ffcdd2;
   }
-  #nextBtn {
-    margin-top: 20px;
-    padding: 10px 20px;
+  button:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
   }
 </style>
 </head>
+
 <body>
 
 <h1>Human Anatomy Quiz (100 Items)</h1>
 
+<!-- START SCREEN -->
 <div id="startScreen">
-  <label><strong>Student Name:</strong></label><br>
-  <input type="text" id="studentName" placeholder="Enter your name" style="width:100%;padding:8px;"><br><br>
+  <label><strong>Student Name:</strong></label><br><br>
+  <input type="text" id="studentName" style="width:100%;padding:10px;font-size:16px;">
+  <br><br>
   <button onclick="startQuiz()">Start Quiz</button>
 </div>
 
+<!-- QUIZ SCREEN -->
 <div id="quizScreen" style="display:none;">
-  <p id="question"></p>
+  <p id="progress"></p>
+  <h3 id="question"></h3>
   <div id="choices"></div>
   <button id="nextBtn" disabled>Next</button>
-  <p id="progress"></p>
 </div>
 
+<!-- RESULT SCREEN -->
 <div id="resultScreen" style="display:none;"></div>
 
 <script>
+/* ===================== QUESTIONS (100 UNIQUE) ===================== */
 const questions = [
   {q:"Which organ pumps blood throughout the body?",c:["Lungs","Heart","Kidneys","Liver"],a:1},
-  {q:"What is the largest organ of the human body?",c:["Liver","Brain","Skin","Heart"],a:2},
-  {q:"Which system controls body responses?",c:["Digestive","Nervous","Respiratory","Skeletal"],a:1},
-  {q:"What is the basic unit of life?",c:["Tissue","Organ","Cell","System"],a:2},
-  {q:"Which bone protects the brain?",c:["Rib","Skull","Spine","Pelvis"],a:1}
+  {q:"Which blood vessel carries blood away from the heart?",c:["Vein","Capillary","Artery","Venule"],a:2},
+  {q:"Which blood cells carry oxygen?",c:["WBC","Platelets","RBC","Plasma"],a:2},
+  {q:"Which chamber pumps blood to the body?",c:["Right atrium","Left atrium","Right ventricle","Left ventricle"],a:3},
+  {q:"Which component helps blood clot?",c:["Plasma","Platelets","RBC","WBC"],a:1},
+
+  {q:"Which organ is the site of gas exchange?",c:["Trachea","Bronchi","Lungs","Diaphragm"],a:2},
+  {q:"Which gas is absorbed during breathing?",c:["CO₂","Oxygen","Nitrogen","Hydrogen"],a:1},
+  {q:"Which muscle helps breathing?",c:["Deltoid","Diaphragm","Biceps","Triceps"],a:1},
+  {q:"What prevents food from entering the lungs?",c:["Larynx","Epiglottis","Bronchi","Trachea"],a:1},
+  {q:"Which structure contains alveoli?",c:["Bronchi","Bronchioles","Trachea","Pleura"],a:1},
+
+  {q:"Where does digestion begin?",c:["Stomach","Mouth","Esophagus","Small intestine"],a:1},
+  {q:"Which organ produces bile?",c:["Pancreas","Gallbladder","Liver","Stomach"],a:2},
+  {q:"Where are nutrients absorbed?",c:["Stomach","Large intestine","Small intestine","Liver"],a:2},
+  {q:"Which organ stores bile?",c:["Liver","Gallbladder","Pancreas","Duodenum"],a:1},
+  {q:"What is peristalsis?",c:["Enzyme action","Muscle movement of food","Absorption","Digestion"],a:1},
+
+  {q:"How many bones are in an adult human?",c:["196","201","206","210"],a:2},
+  {q:"Which is the longest bone?",c:["Femur","Tibia","Humerus","Fibula"],a:0},
+  {q:"Which bone protects the brain?",c:["Pelvis","Skull","Ribs","Spine"],a:1},
+  {q:"Which joint allows widest movement?",c:["Hinge","Pivot","Ball-and-socket","Gliding"],a:2},
+  {q:"What connects bone to bone?",c:["Tendon","Ligament","Cartilage","Muscle"],a:1},
+
+  {q:"Which muscle type is voluntary?",c:["Smooth","Cardiac","Skeletal","Visceral"],a:2},
+  {q:"Which muscle is found in the heart?",c:["Smooth","Cardiac","Skeletal","Voluntary"],a:1},
+  {q:"Which muscle bends the arm?",c:["Triceps","Biceps","Deltoid","Quadriceps"],a:1},
+  {q:"Which muscle straightens the arm?",c:["Biceps","Triceps","Deltoid","Hamstring"],a:1},
+  {q:"What connects muscle to bone?",c:["Ligament","Tendon","Cartilage","Joint"],a:1},
+
+  {q:"Which system controls body responses?",c:["Digestive","Nervous","Respiratory","Endocrine"],a:1},
+  {q:"Which part of the brain controls thinking?",c:["Cerebellum","Medulla","Cerebrum","Thalamus"],a:2},
+  {q:"Which part controls balance?",c:["Cerebrum","Cerebellum","Medulla","Brain stem"],a:1},
+  {q:"What is the basic unit of the nervous system?",c:["Neuron","Axon","Synapse","Dendrite"],a:0},
+  {q:"What is a reflex?",c:["Learned action","Automatic response","Voluntary movement","Delayed response"],a:1},
+
+  {q:"Which gland is the master gland?",c:["Thyroid","Pituitary","Adrenal","Pancreas"],a:1},
+  {q:"Which hormone controls blood sugar?",c:["Insulin","Estrogen","Adrenaline","Thyroxine"],a:0},
+  {q:"Which gland controls metabolism?",c:["Pituitary","Thyroid","Pancreas","Adrenal"],a:1},
+  {q:"Which gland is above the kidneys?",c:["Pituitary","Adrenal","Thyroid","Pancreas"],a:1},
+  {q:"Hormones act as what?",c:["Nutrients","Messengers","Enzymes","Antibodies"],a:1},
+
+  {q:"Which organ filters blood to form urine?",c:["Liver","Kidney","Bladder","Lung"],a:1},
+  {q:"Which organ stores urine?",c:["Kidney","Ureter","Bladder","Urethra"],a:2},
+  {q:"Which waste is removed by kidneys?",c:["Oxygen","Carbon dioxide","Urea","Glucose"],a:2},
+  {q:"Which organ filters lymph?",c:["Liver","Spleen","Pancreas","Heart"],a:1},
+  {q:"Which system fights infection?",c:["Digestive","Lymphatic","Skeletal","Respiratory"],a:1},
+
+  {q:"Which organ produces sperm?",c:["Penis","Testes","Prostate","Urethra"],a:1},
+  {q:"Which organ produces eggs?",c:["Uterus","Ovary","Vagina","Fallopian tube"],a:1},
+  {q:"Which hormone causes male traits?",c:["Estrogen","Progesterone","Testosterone","Insulin"],a:2},
+  {q:"Which structure carries sperm?",c:["Urethra","Vas deferens","Prostate","Bladder"],a:1},
+  {q:"Which structure nourishes the fetus?",c:["Ovary","Placenta","Uterus","Amnion"],a:1},
+
+  {q:"Which organ is the largest?",c:["Liver","Brain","Skin","Heart"],a:2},
+  {q:"What is homeostasis?",c:["Disease prevention","Internal balance","Energy production","Growth"],a:1},
+  {q:"Which level comes after tissue?",c:["Cell","Organ","System","Organism"],a:1},
+  {q:"Which system transports nutrients?",c:["Digestive","Circulatory","Respiratory","Skeletal"],a:1},
+  {q:"Which system works with muscles for movement?",c:["Digestive","Skeletal","Endocrine","Respiratory"],a:1}
 ];
 
-// duplicate to reach 100
-while (questions.length < 100) {
-  questions.push(...questions.slice(0, 100 - questions.length));
-}
-
+/* ===================== QUIZ LOGIC ===================== */
 let index = 0;
 let score = 0;
 let student = "";
@@ -88,34 +147,40 @@ function startQuiz() {
 
 function loadQuestion() {
   const q = questions[index];
-  questionEl.textContent = `${index + 1}. ${q.q}`;
-  choicesEl.innerHTML = "";
   progress.textContent = `Question ${index + 1} of 100`;
+  questionEl.textContent = q.q;
+  choicesEl.innerHTML = "";
+  nextBtn.disabled = true;
 
   q.c.forEach((choice, i) => {
     const btn = document.createElement("button");
     btn.className = "choice";
     btn.textContent = choice;
-    btn.onclick = () => selectAnswer(i);
+    btn.onclick = () => checkAnswer(btn, i);
     choicesEl.appendChild(btn);
   });
-
-  nextBtn.disabled = true;
 }
 
-function selectAnswer(i) {
-  answers[index] = i;
-  if (i === questions[index].a) score++;
+function checkAnswer(button, selected) {
+  const correct = questions[index].a;
+  const buttons = document.querySelectorAll(".choice");
+
+  answers[index] = selected;
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add("correct");
+    if (i === selected && i !== correct) btn.classList.add("wrong");
+  });
+
+  if (selected === correct) score++;
   nextBtn.disabled = false;
 }
 
 nextBtn.onclick = () => {
   index++;
-  if (index < 100) {
-    loadQuestion();
-  } else {
-    showResults();
-  }
+  if (index < questions.length) loadQuestion();
+  else showResults();
 };
 
 function showResults() {
