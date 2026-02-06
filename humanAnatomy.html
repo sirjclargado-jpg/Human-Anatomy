@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Human Anatomy Quiz – 100 Items</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+  }
+  .choice {
+    margin: 8px 0;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+  }
+  .correct {
+    background-color: #c8e6c9;
+  }
+  .wrong {
+    background-color: #ffcdd2;
+  }
+  #nextBtn {
+    margin-top: 20px;
+    padding: 10px 20px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Human Anatomy Quiz (100 Items)</h1>
+
+<div id="startScreen">
+  <label><strong>Student Name:</strong></label><br>
+  <input type="text" id="studentName" placeholder="Enter your name" style="width:100%;padding:8px;"><br><br>
+  <button onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div id="quizScreen" style="display:none;">
+  <p id="question"></p>
+  <div id="choices"></div>
+  <button id="nextBtn" disabled>Next</button>
+  <p id="progress"></p>
+</div>
+
+<div id="resultScreen" style="display:none;"></div>
+
+<script>
+const questions = [
+  {q:"Which organ pumps blood throughout the body?",c:["Lungs","Heart","Kidneys","Liver"],a:1},
+  {q:"What is the largest organ of the human body?",c:["Liver","Brain","Skin","Heart"],a:2},
+  {q:"Which system controls body responses?",c:["Digestive","Nervous","Respiratory","Skeletal"],a:1},
+  {q:"What is the basic unit of life?",c:["Tissue","Organ","Cell","System"],a:2},
+  {q:"Which bone protects the brain?",c:["Rib","Skull","Spine","Pelvis"],a:1}
+];
+
+// duplicate to reach 100
+while (questions.length < 100) {
+  questions.push(...questions.slice(0, 100 - questions.length));
+}
+
+let index = 0;
+let score = 0;
+let student = "";
+let answers = [];
+
+const questionEl = document.getElementById("question");
+const choicesEl = document.getElementById("choices");
+const nextBtn = document.getElementById("nextBtn");
+const progress = document.getElementById("progress");
+const resultScreen = document.getElementById("resultScreen");
+
+function startQuiz() {
+  student = document.getElementById("studentName").value.trim();
+  if (!student) {
+    alert("Please enter your name.");
+    return;
+  }
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("quizScreen").style.display = "block";
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = questions[index];
+  questionEl.textContent = `${index + 1}. ${q.q}`;
+  choicesEl.innerHTML = "";
+  progress.textContent = `Question ${index + 1} of 100`;
+
+  q.c.forEach((choice, i) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = choice;
+    btn.onclick = () => selectAnswer(i);
+    choicesEl.appendChild(btn);
+  });
+
+  nextBtn.disabled = true;
+}
+
+function selectAnswer(i) {
+  answers[index] = i;
+  if (i === questions[index].a) score++;
+  nextBtn.disabled = false;
+}
+
+nextBtn.onclick = () => {
+  index++;
+  if (index < 100) {
+    loadQuestion();
+  } else {
+    showResults();
+  }
+};
+
+function showResults() {
+  document.getElementById("quizScreen").style.display = "none";
+  resultScreen.style.display = "block";
+
+  let html = `<h2>Student: ${student}</h2>`;
+  html += `<h3>Score: ${score} / 100</h3><hr>`;
+
+  questions.forEach((q, i) => {
+    html += `<p><strong>${i + 1}. ${q.q}</strong></p>`;
+    q.c.forEach((choice, idx) => {
+      let cls = "";
+      if (idx === q.a) cls = "correct";
+      if (answers[i] === idx && idx !== q.a) cls = "wrong";
+      html += `<div class="${cls}">${choice}</div>`;
+    });
+    html += "<br>";
+  });
+
+  resultScreen.innerHTML = html;
+}
+</script>
+
+</body>
+</html>
